@@ -20,28 +20,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const customerSiteData = [
-        { customer: "BPIA", site: "Ardeer" },
-        { customer: "Carclo", site: "Czech" },
-        { customer: "Carclo", site: "China" },
-        { customer: "Carclo", site: "India" },
-        { customer: "Carclo", site: "Mitcham" },
-        { customer: "Carclo", site: "Export" },
-        { customer: "Carclo", site: "Latrobe" },
+        { customer: "BPIA", site: "" },
+        { customer: "carclo", site: "Czech" },
+        { customer: "carclo", site: "China" },
+        { customer: "carclo", site: "India" },
+        { customer: "carclo", site: "Mitcham" },
+        { customer: "carclo", site: "Export" },
+        { customer: "carclo", site: "Latrobe" },
         { customer: "WHS", site: "Birmingham" },
         { customer: "WHS", site: "Pickering" },
-        { customer: "Desch", site: "UK" },
+        { customer: "Desch", site: "uk" },
         { customer: "Desch", site: "Poland" },
-        { customer: "RGE", site: "Yate" },
-        { customer: "RGE", site: "Peterborough" },
-        { customer: "RGE", site: "Baltic" },
-        { customer: "Southern Champion", site: "" },
-        { customer: "Kernow", site: "" },
+        { customer: "rge", site: "Yate" },
+        { customer: "rge", site: "Whittlesey" },
+        { customer: "rge", site: "Baltic" },
+        { customer: "southern", site: "Champion" },
+        { customer: "KC", site: "" },
         { customer: "SKL", site: "Nairobi" },
         { customer: "MBC", site: "" },
         { customer: "Radnor", site: "" },
-        { customer: "Kendall Nutricare", site: "" },
-        { customer: "McColgans", site: "" },
-        { customer: "Stonegate", site: "" },
+        { customer: "KNC", site: "" },
+        { customer: "Mccolgans", site: "" },
+        { customer: "stoneGate", site: "Gate" },
         { customer: "STL", site: "Tanzania" },
         { customer: "YPM", site: "" },
         { customer: "Delifrance", site: "" },
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ];
 
     customerSiteData.forEach((entry, index) => {
-        const portalName = `${entry.customer} ${entry.site}`;
+        const portalName = `${entry.customer} ${entry.site}`.toUpperCase(); 
         const portalItem = `
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="portal-${index}">
@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
         portalList.innerHTML += portalItem;
     });
+    
 
     fetchDataButton.addEventListener("click", async () => {
         if (validateInputs()) {
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const response = await fetch(`http://localhost:302/clients?startDate=${fromDate}&endDate=${toDate}`);
                     if (!response.ok) throw new Error("Failed to fetch data for all clients");
                     data = await response.json();
-                    console.log('Data for all clients:', data); // Log data for debugging
+                
                 } else {
                     for (const checkbox of selectedCheckboxes) {
                         const clientName = checkbox.nextElementSibling.innerText.replace(/\s+/g, '');
@@ -84,11 +85,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (!response.ok) throw new Error(`Failed to fetch data for ${clientName}`);
                         const clientData = await response.json();
                         data = data.concat(clientData);
-                        console.log(`Data for ${clientName}:`, clientData); // Log data for each client
                     }
                 }
     
-                populateTable(data);  // Populate table after data is fetched
+                populateTable(data);  
                 downloadExcelButton.classList.remove("d-none");
             } catch (error) {
                 alert(`Error: ${error.message}`);
@@ -99,18 +99,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     
     function populateTable(data) {
-        console.log('Data to populate the table:', data); // Log data for debugging
     
         dataTableBody.innerHTML = data.map((item) => {
-            // Access the nested 'data' object for each item
             const downtimeData = item.data || {};
     
-            // Extract values from the 'data' object, defaulting to 0 if not present
             const poweredOff = downtimeData['Poweredoff Downtime Hours'] || 0;
             const unclassified = downtimeData['Unclassified Downtime Hours'] || 0;
             const unplanned = downtimeData['Unplanned Downtime Hours'] || 0;
     
-            // Calculate percentage and jobs over 150 condition
             const uncategorizedPercentage = (unclassified + poweredOff) / unplanned * 100 || 0;
             const jobsOver150 = (unclassified + poweredOff) > 150 ? 1 : 0;
     
@@ -124,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${jobsOver150}</td>
                 </tr>
             `;
-        }).join(""); // Join the rows to form the complete table body
+        }).join(""); 
     }
     
     
