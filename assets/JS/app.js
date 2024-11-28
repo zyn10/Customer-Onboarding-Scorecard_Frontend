@@ -103,9 +103,10 @@ document.addEventListener("DOMContentLoaded", function () {
         dataTableBody.innerHTML = data.map((item) => {
             const downtimeData = item.data || {};
     
-            const poweredOff = downtimeData['Poweredoff Downtime Hours'] || 0;
-            const unclassified = downtimeData['Unclassified Downtime Hours'] || 0;
-            const unplanned = downtimeData['Unplanned Downtime Hours'] || 0;
+            const poweredOff = Math.round(downtimeData['Poweredoff Downtime Hours'] || 0);
+            const unclassified = Math.round(downtimeData['Unclassified Downtime Hours'] || 0);
+            const unplanned = Math.round(downtimeData['Unplanned Downtime Hours'] || 0);
+            
     
             const uncategorizedPercentage = (unclassified + poweredOff) / unplanned * 100 || 0;
             const jobsOver150 = (unclassified + poweredOff) > 150 ? 1 : 0;
@@ -141,27 +142,40 @@ document.addEventListener("DOMContentLoaded", function () {
         XLSX.utils.book_append_sheet(wb, ws, "Onboarding Data");
         XLSX.writeFile(wb, fileName);
     });
-
     function validateInputs() {
-        const fromDate = document.getElementById("from-date").value;
-        const toDate = document.getElementById("to-date").value;
-        const isPortalSelected = Array.from(document.querySelectorAll('.portal-list input[type="checkbox"]')).some(checkbox => checkbox.checked);
-
-        if (!isPortalSelected) {
-            alert("Please select at least one portal.");
+        const fromDate = document.getElementById('from-date').value;
+        const toDate = document.getElementById('to-date').value;
+        const isAnyPortalChecked = document.querySelectorAll('.portal-list input[type="checkbox"]:checked').length > 0;
+        const selectAll = document.getElementById('select-all');
+    
+        if (!isAnyPortalChecked && !selectAll.checked) {
+            alert('Please select at least one portal.');
             return false;
         }
-
+    
         if (!fromDate || !toDate) {
-            alert("Please select both 'From' and 'To' dates.");
+            alert('Both dates must be selected.');
             return false;
         }
-
-        if (new Date(fromDate) > new Date(toDate)) {
-            alert("'From' date must be earlier than 'To' date.");
+    
+        const fromDateObj = new Date(fromDate);
+        const toDateObj = new Date(toDate);
+    
+        if (fromDateObj >= toDateObj) {
+            alert('"From" date must be earlier than "To" date.');
             return false;
         }
-
+    
+        const timeDiff = toDateObj - fromDateObj;
+        const dayDiff = timeDiff / (1000 * 3600 * 24);
+    
+        if (dayDiff > 7) {
+            alert('The date range cannot be more than 7 days.');
+            return false;
+        }
+    
         return true;
     }
+    
+
 });
