@@ -16,7 +16,6 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div id="main-content" class="container-fluid d-none">
         <header class="navbar navbar-light bg-light px-4">
             <div class="d-flex align-items-center">
@@ -46,11 +45,9 @@
                     <input type="date" id="to-date" class="form-control">
                 </div>
                 <button id="fetch-data" class="btn btn-primary w-100">Fetch Data</button>
-                <!-- Hidden initially -->
                 <button id="download-excel" class="btn btn-success w-100 mt-3 d-none">Download Excel</button>
             </div>
 
-            <!-- Right Column -->
             <div class="col-md-8">
                 <h5>Results</h5>
                 <table class="table table-bordered table-striped">
@@ -65,12 +62,18 @@
                         </tr>
                     </thead>
                     <tbody id="data-table-body">
-                        <!-- Data Rows -->
+
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+<div id="loading-dialog" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50">
+    <div class="bg-white p-4 rounded shadow text-center">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p>"The journey of a thousand miles begins with a single step." – Lao Tzu</p>
+    </div>
+</div>
 
     <script src="assets/js/app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> <!-- XLSX library -->
