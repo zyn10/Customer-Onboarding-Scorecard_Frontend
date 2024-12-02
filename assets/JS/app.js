@@ -20,37 +20,39 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const customerSiteData = [
-        { customer: "BPIA", site: "" },
-        { customer: "carclo", site: "Czech" },
-        { customer: "carclo", site: "China" },
-        { customer: "carclo", site: "India" },
-        { customer: "carclo", site: "Mitcham" },
-        { customer: "carclo", site: "Export" },
-        { customer: "carclo", site: "Latrobe" },
-        { customer: "WHS", site: "Birmingham" },
-        { customer: "WHS", site: "Pickering" },
-        { customer: "Desch", site: "uk" },
-        { customer: "Desch", site: "Poland" },
-        { customer: "rge", site: "Yate" },
-        { customer: "rge", site: "Whittlesey" },
-        { customer: "rge", site: "Baltic" },
-        { customer: "southern", site: "Champion" },
-        { customer: "KC", site: "" },
-        { customer: "SKL", site: "Nairobi" },
-        { customer: "MBC", site: "" },
-        { customer: "Radnor", site: "" },
-        { customer: "KNC", site: "" },
-        { customer: "Mccolgans", site: "" },
-        { customer: "stoneGate", site: "Gate" },
-        { customer: "STL", site: "Tanzania" },
-        { customer: "YPM", site: "" },
-        { customer: "Delifrance", site: "" },
-        { customer: "Quin", site: "" },
-        { customer: "Aquascot", site: "" }
+        { customer: "BPIA", site: " Ardeer" },
+        { customer: "Carclo", site: " Czech"  },
+        { customer: "Carclo", site: " China"  },
+        { customer: "Carclo", site: " India"  },
+        { customer: "Carclo", site: " Mitcham"  },
+        { customer: "Carclo", site: " Export"  },
+        { customer: "Carclo", site: " Latrobe"  },
+        { customer: "Carclo", site: " Tucson", },
+        { customer: "WHS", site: " Birmingham", },
+        { customer: "WHS", site: " Pickering", },
+        { customer: "Desch", site: " UK"  },
+        { customer: "Desch", site: " Poland"  },
+        { customer: "RGE", site: " Yate"  },
+        { customer: "RGE", site: " Peterborough"  },
+        { customer: "RGE", site: " Baltic"  },
+        { customer: "Southern", site: " Champion"  },
+        { customer: "Kernow", site: " KC"  },
+        // { customer: "SKL", site: "Nairobi" },
+        { customer: "MBC", site: ""  },
+        { customer: "Radnor", site: ""  },
+        { customer: "Kendal Nutricare", site: " KNC" },
+        { customer: "Mccolgans", site: ""  },
+        { customer: "Stone", site: "Gate" },
+        // { customer: "STL", site: "Tanzania" },
+        { customer: "YPM", site: "", },
+        { customer: "Delifrance", site: "", },
+        { customer: "Quin", site: "", },
+        { customer: "Aquascot", site: "" },
+        { customer: "Xandor", site: "" }
     ];
 
     customerSiteData.forEach((entry, index) => {
-        const portalName = `${entry.customer} ${entry.site}`.toUpperCase(); 
+        const portalName = `${entry.customer} ${entry.site}`; 
         const portalItem = `
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="portal-${index}">
@@ -77,10 +79,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     const response = await fetch(`http://localhost:302/clients?startDate=${fromDate}&endDate=${toDate}`);
                     if (!response.ok) throw new Error("Failed to fetch data for all clients");
                     data = await response.json();
+                    console.log("data");
                 
                 } else {
                     for (const checkbox of selectedCheckboxes) {
-                        const clientName = checkbox.nextElementSibling.innerText.replace(/\s+/g, '');
+                        const clientName = checkbox.nextElementSibling.innerText.replace();
                         const response = await fetch(`http://localhost:302/client?clientName=${clientName}&startDate=${fromDate}&endDate=${toDate}`);
                         if (!response.ok) throw new Error(`Failed to fetch data for ${clientName}`);
                         const clientData = await response.json();
@@ -106,11 +109,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const poweredOff = Math.round(downtimeData['Poweredoff Downtime Hours'] || 0);
             const unclassified = Math.round(downtimeData['Unclassified Downtime Hours'] || 0);
             const unplanned = Math.round(downtimeData['Unplanned Downtime Hours'] || 0);
-            
-    
             const uncategorizedPercentage = (unclassified + poweredOff) / unplanned * 100 || 0;
-            const jobsOver150 = (unclassified + poweredOff) > 150 ? 1 : 0;
-    
+            const jobsOver150 = Math.round(downtimeData['Over 150 Hours'] || 0);
             return `
                 <tr>
                     <td>${item.client}</td>
