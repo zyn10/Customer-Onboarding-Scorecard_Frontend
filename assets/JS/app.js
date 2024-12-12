@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { customer: "Carclo", site: " Mitcham"  },
         { customer: "Carclo", site: " Export"  },
         { customer: "Carclo", site: " Latrobe"  },
-        { customer: "Carclo", site: " Tucson", },
+        // { customer: "Carclo", site: " Tucson", },
         { customer: "WHS", site: " Birmingham", },
         { customer: "WHS", site: " Pickering", },
         { customer: "Desch", site: " UK"  },
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { customer: "Delifrance", site: "", },
         { customer: "Quin", site: "", },
         { customer: "Aquascot", site: "" },
-        { customer: "Xandor", site: "" }
+        // { customer: "Xandor", site: "" }
     ];
 
     customerSiteData.forEach((entry, index) => {
