@@ -160,6 +160,12 @@ document.addEventListener("DOMContentLoaded", function () {
     
         const fromDateObj = new Date(fromDate);
         const toDateObj = new Date(toDate);
+        const currentDate = new Date();
+    
+        if (fromDateObj > currentDate || toDateObj > currentDate) {
+            alert('The selected dates cannot be in the future.');
+            return false;
+        }
     
         if (fromDateObj >= toDateObj) {
             alert('"From" date must be earlier than "To" date.');
@@ -168,7 +174,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
         const timeDiff = toDateObj - fromDateObj;
         const dayDiff = timeDiff / (1000 * 3600 * 24);
-    
         if (dayDiff > 7) {
             alert('The date range cannot be more than 7 days.');
             return false;
@@ -176,6 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         return true;
     }
+    
     
 
 });
