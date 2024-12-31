@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { customer: "WHS", site: " Pickering", },
         { customer: "Desch", site: " UK"  },
         { customer: "Desch", site: " Poland"  },
-        { customer: "RGE", site: " Yate"  },
+        // { customer: "RGE", site: " Yate"  },
         { customer: "RGE", site: " Peterborough"  },
         { customer: "RGE", site: " Baltic"  },
         { customer: "Southern", site: " Champion"  },
@@ -102,15 +102,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     
     function populateTable(data) {
-    
         dataTableBody.innerHTML = data.map((item) => {
             const downtimeData = item.data || {};
     
             const poweredOff = Math.round(downtimeData['Poweredoff Downtime Hours'] || 0);
             const unclassified = Math.round(downtimeData['Unclassified Downtime Hours'] || 0);
             const unplanned = Math.round(downtimeData['Unplanned Downtime Hours'] || 0);
-            const uncategorizedPercentage = (unclassified + poweredOff) / unplanned * 100 || 0;
             const jobsOver150 = Math.round(downtimeData['Over 150 Hours'] || 0);
+    
+            let uncategorizedPercentage;
+            if (item.client == "Mccolgans" || item.client == "Desch UK") {
+                uncategorizedPercentage = (unclassified) / unplanned * 100 || 0;
+            } else {
+                uncategorizedPercentage = (unclassified + poweredOff) / unplanned * 100 || 0;
+            }
+    
             return `
                 <tr>
                     <td>${item.client}</td>
@@ -123,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
         }).join(""); 
     }
+    
     
     
     
