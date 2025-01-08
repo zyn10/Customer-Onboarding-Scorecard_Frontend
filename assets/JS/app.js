@@ -1,25 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
-  let splashScreen = document.getElementById("splash-screen");
-  let mainContent = document.getElementById("main-content");
+  const splashScreen = document.getElementById("splash-screen");
+  const mainContent = document.getElementById("main-content");
 
   setTimeout(() => {
     splashScreen.classList.add("d-none");
     mainContent.classList.remove("d-none");
   }, 3000);
 
-  let portalList = document.querySelector(".portal-list");
-  let selectAllCheckbox = document.getElementById("select-all");
-  let fetchDataButton = document.getElementById("fetch-data");
-  let downloadExcelButton = document.getElementById("download-excel");
-  let dataTableBody = document.getElementById("data-table-body");
-  let loadingDialog = document.getElementById("loading-dialog");
+  const portalList = document.querySelector(".portal-list");
+  const selectAllCheckbox = document.getElementById("select-all");
+  const fetchDataButton = document.getElementById("fetch-data");
+  const downloadExcelButton = document.getElementById("download-excel");
+  const dataTableBody = document.getElementById("data-table-body");
+  const loadingDialog = document.getElementById("loading-dialog");
 
   selectAllCheckbox.addEventListener("change", function () {
-    let checkboxes = portalList.querySelectorAll("input[type='checkbox']");
+    const checkboxes = portalList.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach((checkbox) => (checkbox.checked = this.checked));
   });
 
-  let customerSiteData = [
+  const customerSiteData = [
     { customer: "BPIA", site: " Ardeer" },
     { customer: "Carclo", site: " Czech" },
     { customer: "Carclo", site: " China" },
@@ -52,8 +52,8 @@ document.addEventListener("DOMContentLoaded", function () {
   ];
 
   customerSiteData.forEach((entry, index) => {
-    let portalName = `${entry.customer} ${entry.site}`;
-    let portalItem = `
+    const portalName = `${entry.customer} ${entry.site}`;
+    const portalItem = `
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="portal-${index}">
                 <label for="portal-${index}" class="form-check-label">${portalName}</label>
@@ -66,18 +66,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (validateInputs()) {
       loadingDialog.classList.remove("d-none");
 
-      let fromDate = document.getElementById("from-date").value;
-      let toDate = document.getElementById("to-date").value;
-      let selectedCheckboxes = Array.from(
+      const fromDate = document.getElementById("from-date").value;
+      const toDate = document.getElementById("to-date").value;
+      const selectedCheckboxes = Array.from(
         document.querySelectorAll(".portal-list input[type='checkbox']:checked")
       );
-      let isAllSelected = selectAllCheckbox.checked;
+      const isAllSelected = selectAllCheckbox.checked;
 
       try {
         let data = [];
 
         if (isAllSelected) {
-          let response = await fetch(
+          const response = await fetch(
             `http://localhost:302/clients?startDate=${fromDate}&endDate=${toDate}`
           );
           if (!response.ok)
@@ -85,14 +85,14 @@ document.addEventListener("DOMContentLoaded", function () {
           data = await response.json();
           console.log("data");
         } else {
-          for (let checkbox of selectedCheckboxes) {
-            let clientName = checkbox.nextElementSibling.innerText.replace();
-            let response = await fetch(
+          for (const checkbox of selectedCheckboxes) {
+            const clientName = checkbox.nextElementSibling.innerText.replace();
+            const response = await fetch(
               `http://localhost:302/client?clientName=${clientName}&startDate=${fromDate}&endDate=${toDate}`
             );
             if (!response.ok)
               throw new Error(`Failed to fetch data for ${clientName}`);
-            let clientData = await response.json();
+            const clientData = await response.json();
             data = data.concat(clientData);
           }
         }
@@ -110,49 +110,60 @@ document.addEventListener("DOMContentLoaded", function () {
   function populateTable(data) {
     dataTableBody.innerHTML = data
       .map((item) => {
-        let downtimeData = item.data || {};
+        const downtimeData = item.data || {};
 
-        let poweredOff = (
+        let poweredOff = parseFloat(
           downtimeData["Poweredoff Downtime Hours"] || 0
-        ).toFixed(2);
-
-        let unclassified = (
+        );
+        let unclassified = parseFloat(
           downtimeData["Unclassified Downtime Hours"] || 0
-        ).toFixed(2);
-        let unplanned = Math.round(
+        );
+        const unplanned = Math.round(
           downtimeData["Unplanned Downtime Hours"] || 0
         );
-        let jobsOver150 = Math.round(downtimeData["Over 150 Hours"] || 0);
+        const jobsOver150 = parseFloat(downtimeData["Over 150 Hours"] || 0);
+
+        // Ensure `Powered Off` is 0 for "Desch UK" and "Mccolgans"
+        if (item.client === "Desch UK" || item.client === "Mccolgans") {
+          poweredOff = 0;
+        }
+
+        // Round off values to 2 decimal places
+        poweredOff = poweredOff.toFixed(2);
+        unclassified = unclassified.toFixed(2);
 
         let uncategorizedPercentage;
-        if (item.client == "Mccolgans" || item.client == "Desch UK") {
-          uncategorizedPercentage = (unclassified / unplanned) * 100 || 0;
-          poweredOff = 0;
+        if (item.client === "Mccolgans" || item.client === "Desch UK") {
+          uncategorizedPercentage = (
+            (unclassified / unplanned) * 100 || 0
+          ).toFixed(2);
         } else {
-          uncategorizedPercentage =
-            ((unclassified + poweredOff) / unplanned) * 100 || 0;
+          uncategorizedPercentage = (
+            ((parseFloat(unclassified) + parseFloat(poweredOff)) / unplanned) *
+              100 || 0
+          ).toFixed(2);
         }
 
         return `
-                <tr>
-                    <td>${item.client}</td>
-                    <td>${unclassified}</td>
-                    <td>${poweredOff}</td>
-                    <td>${unplanned}</td>
-                    <td>${uncategorizedPercentage.toFixed(1)}%</td>
-                    <td>${jobsOver150}</td>
-                </tr>
-            `;
+              <tr>
+                  <td>${item.client}</td>
+                  <td>${unclassified}</td>
+                  <td>${poweredOff}</td>
+                  <td>${unplanned}</td>
+                  <td>${uncategorizedPercentage}%</td>
+                  <td>${jobsOver150}</td>
+              </tr>
+          `;
       })
       .join("");
   }
 
   downloadExcelButton.addEventListener("click", () => {
-    let startDate = document.getElementById("from-date").value;
-    let endDate = document.getElementById("to-date").value;
-    let fileName = `onboarding_data_from_${startDate}_to_${endDate}.xlsx`;
+    const startDate = document.getElementById("from-date").value;
+    const endDate = document.getElementById("to-date").value;
+    const fileName = `onboarding_data_from_${startDate}_to_${endDate}.xlsx`;
 
-    let dataToExport = [
+    const dataToExport = [
       [
         "Site Name",
         "Unclassified Time",
@@ -166,18 +177,18 @@ document.addEventListener("DOMContentLoaded", function () {
       ),
     ];
 
-    let wb = XLSX.utils.book_new();
-    let ws = XLSX.utils.aoa_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(dataToExport);
     XLSX.utils.book_append_sheet(wb, ws, "Onboarding Data");
     XLSX.writeFile(wb, fileName);
   });
   function validateInputs() {
-    let fromDate = document.getElementById("from-date").value;
-    let toDate = document.getElementById("to-date").value;
-    let isAnyPortalChecked =
+    const fromDate = document.getElementById("from-date").value;
+    const toDate = document.getElementById("to-date").value;
+    const isAnyPortalChecked =
       document.querySelectorAll('.portal-list input[type="checkbox"]:checked')
         .length > 0;
-    let selectAll = document.getElementById("select-all");
+    const selectAll = document.getElementById("select-all");
 
     if (!isAnyPortalChecked && !selectAll.checked) {
       alert("Please select at least one portal.");
@@ -189,9 +200,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return false;
     }
 
-    let fromDateObj = new Date(fromDate);
-    let toDateObj = new Date(toDate);
-    let currentDate = new Date();
+    const fromDateObj = new Date(fromDate);
+    const toDateObj = new Date(toDate);
+    const currentDate = new Date();
 
     if (fromDateObj > currentDate || toDateObj > currentDate) {
       alert("The selected dates cannot be in the future.");
@@ -203,8 +214,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return false;
     }
 
-    let timeDiff = toDateObj - fromDateObj;
-    let dayDiff = timeDiff / (1000 * 3600 * 24);
+    const timeDiff = toDateObj - fromDateObj;
+    const dayDiff = timeDiff / (1000 * 3600 * 24);
     if (dayDiff > 7) {
       alert("The date range cannot be more than 7 days.");
       return false;
