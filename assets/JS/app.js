@@ -126,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let uncategorizedPercentage;
         if (item.client == "Mccolgans" || item.client == "Desch UK") {
           uncategorizedPercentage = (unclassified / unplanned) * 100 || 0;
+          poweredOff = 0;
         } else {
           uncategorizedPercentage =
             ((unclassified + poweredOff) / unplanned) * 100 || 0;
@@ -137,7 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${unclassified}</td>
                     <td>${poweredOff}</td>
                     <td>${unplanned}</td>
-                    <td>${uncategorizedPercentage.toFixed(2)}%</td>
+                    <td>${uncategorizedPercentage.toFixed(1)}%</td>
                     <td>${jobsOver150}</td>
                 </tr>
             `;
