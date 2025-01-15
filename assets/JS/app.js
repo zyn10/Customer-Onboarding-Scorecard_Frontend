@@ -25,11 +25,11 @@ document.addEventListener("DOMContentLoaded", function () {
     { customer: "Carclo", site: " China" },
     { customer: "Carclo", site: " India" },
     { customer: "Carclo", site: " Mitcham" },
-    { customer: "Carclo", site: " Export" },
+    // { customer: "Carclo", site: " Export" },
     { customer: "Carclo", site: " Latrobe" },
     // { customer: "Carclo", site: " Tucson", },
     { customer: "WHS", site: " Birmingham" },
-    { customer: "WHS", site: " Pickering" },
+    { customer: "WHS", site: " Pickering" }, // { customer: "Xandor", site: "" }
     { customer: "Desch", site: " UK" },
     { customer: "Desch", site: " Poland" },
     // { customer: "RGE", site: " Yate"  },
@@ -48,7 +48,6 @@ document.addEventListener("DOMContentLoaded", function () {
     { customer: "Delifrance", site: "" },
     { customer: "Quin", site: "" },
     { customer: "Aquascot", site: "" },
-    // { customer: "Xandor", site: "" }
   ];
 
   customerSiteData.forEach((entry, index) => {
