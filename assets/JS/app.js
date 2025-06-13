@@ -121,35 +121,30 @@ document.addEventListener("DOMContentLoaded", function () {
         let unclassified = parseFloat(
           downtimeData["Unclassified Downtime Hours"] || 0
         );
+        let noncategorised = parseFloat(
+          downtimeData["Non-Categorised Downtime Hours"] || 0
+        );
+        let alltime = parseFloat(downtimeData["All Time Hours"] || 0);
         const unplanned = Math.round(
           downtimeData["Unplanned Downtime Hours"] || 0
         );
         const jobsOver150 = parseFloat(downtimeData["Over 150 Hours"] || 0);
-
-        // Ensure `Powered Off` is 0 for "Desch UK" and "Mccolgans"
-        if (item.client === "Desch UK" || item.client === "Mccolgans") {
-          poweredOff = 0;
-        }
 
         // Round off values to 2 decimal places
         poweredOff = poweredOff.toFixed(2);
         unclassified = unclassified.toFixed(2);
 
         let uncategorizedPercentage;
-        if (item.client === "Mccolgans" || item.client === "Desch UK") {
-          uncategorizedPercentage = (
-            (unclassified / unplanned) * 100 || 0
-          ).toFixed(2);
-        } else {
-          uncategorizedPercentage = (
-            ((parseFloat(unclassified) + parseFloat(poweredOff)) / unplanned) *
-              100 || 0
-          ).toFixed(2);
-        }
+
+        uncategorizedPercentage = (
+          (parseFloat(noncategorised) / alltime) * 100 || 0
+        ).toFixed(2);
 
         return `
               <tr>
                   <td>${item.client}</td>
+                  <td>${alltime}</td>
+                  <td>${noncategorised}</td>
                   <td>${unclassified}</td>
                   <td>${poweredOff}</td>
                   <td>${unplanned}</td>
