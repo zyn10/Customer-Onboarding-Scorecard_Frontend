@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const customerSiteData = [
     { customer: "BPIA", site: " Ardeer" },
     { customer: "Carclo", site: " Czech" },
-    { customer: "Carclo", site: " China" },
+    { customer: "Carclo", site: " Taicang" },
     { customer: "Carclo", site: " India" },
     { customer: "Carclo", site: " Mitcham" },
     { customer: "Carclo", site: " Latrobe" },
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
     dataTableBody.innerHTML = data
       .map((item) => {
         const downtimeData = item.data || {};
-
+        let alltime = parseFloat(downtimeData["All Time Hours"] || 0);
         let poweredOff = parseFloat(
           downtimeData["Poweredoff Downtime Hours"] || 0
         );
@@ -124,26 +124,29 @@ document.addEventListener("DOMContentLoaded", function () {
         let noncategorised = parseFloat(
           downtimeData["Non-Categorised Downtime Hours"] || 0
         );
-        let alltime = parseFloat(downtimeData["All Time Hours"] || 0);
+        let totalDowntimeHours = parseFloat(
+          downtimeData["Total Downtime Hours"] || 0
+        );
         const unplanned = Math.round(
           downtimeData["Unplanned Downtime Hours"] || 0
         );
         const jobsOver150 = parseFloat(downtimeData["Over 150 Hours"] || 0);
 
-        // Round off values to 2 decimal places
         poweredOff = poweredOff.toFixed(2);
         unclassified = unclassified.toFixed(2);
 
         let uncategorizedPercentage;
 
         uncategorizedPercentage = (
-          (parseFloat(noncategorised) / alltime) * 100 || 0
+          (parseFloat(noncategorised) / downtimeData["Total Downtime Hours"]) *
+            100 || 0
         ).toFixed(2);
 
         return `
               <tr>
                   <td>${item.client}</td>
                   <td>${alltime}</td>
+                  <td>${totalDowntimeHours}</td>
                   <td>${noncategorised}</td>
                   <td>${unclassified}</td>
                   <td>${poweredOff}</td>
@@ -163,23 +166,62 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const dataToExport = [
       [
+        "From Date",
+        "To Date",
         "Site Name",
+        "All Time Hours",
+        "Total Downtime Hours",
+        "Non-Categorised Downtime Hours",
         "Unclassified Time",
         "Powered Off",
         "Unplanned Downtime",
         "Percentage of Uncategorized",
         "Jobs over 150% Complete",
       ],
-      ...Array.from(dataTableBody.rows).map((row) =>
-        Array.from(row.cells).map((cell) => cell.innerText)
-      ),
+      ...Array.from(dataTableBody.rows).map((row) => {
+        const rowData = Array.from(row.cells).map((cell) => cell.innerText);
+        return [startDate, endDate, ...rowData];
+      }),
     ];
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(dataToExport);
+
+    // Apply styling to header row
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      fill: { patternType: "solid", fgColor: { rgb: "2F75B5" } }, // Blue header
+    };
+
+    const grayFill = { patternType: "solid", fgColor: { rgb: "E7E6E6" } }; // Light gray
+    const greenFill = { patternType: "solid", fgColor: { rgb: "C6EFCE" } }; // Soft green
+
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    for (let col = 0; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      const cell = ws[cellAddress];
+      if (!cell) continue;
+
+      cell.s = { ...headerStyle };
+
+      if (col === 2) {
+        delete cell.s.fill;
+      } else if (col >= 6) {
+        cell.s.fill = greenFill;
+      } else {
+        cell.s.fill = grayFill;
+      }
+    }
+
+    // Optional: freeze top row
+    ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+
+    // Append sheet and write file
     XLSX.utils.book_append_sheet(wb, ws, "Onboarding Data");
     XLSX.writeFile(wb, fileName);
   });
+
   function validateInputs() {
     const fromDate = document.getElementById("from-date").value;
     const toDate = document.getElementById("to-date").value;
