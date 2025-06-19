@@ -19,51 +19,26 @@ document.addEventListener("DOMContentLoaded", function () {
     checkboxes.forEach((checkbox) => (checkbox.checked = this.checked));
   });
 
-  const customerSiteData = [
-    { customer: "BPIA", site: " Ardeer" },
-    { customer: "Carclo", site: " Czech" },
-    { customer: "Carclo", site: " Taicang" },
-    { customer: "Carclo", site: " India" },
-    { customer: "Carclo", site: " Mitcham" },
-    { customer: "Carclo", site: " Latrobe" },
-    { customer: "WHS", site: " Birmingham" },
-    { customer: "WHS", site: " Pickering" },
-    { customer: "Desch", site: " UK" },
-    { customer: "Desch", site: " Poland" },
-    // { customer: "RGE", site: " Yate"  },
-    { customer: "RGE", site: " Peterborough" },
-    { customer: "RGE", site: " Baltic" },
-    { customer: "Southern", site: " Champion" },
-    // { customer: "Kernow", site: " KC"  },
-    { customer: "SKL", site: "" },
-    { customer: "MBC", site: "" },
-    { customer: "Radnor", site: "" },
-    { customer: "Kendal Nutricare", site: " KNC" },
-    { customer: "Mccolgans", site: "" },
-    { customer: "Stonegate", site: "" },
-    { customer: "STL", site: "" },
-    { customer: "YPM", site: "" },
-    { customer: "Delifrance", site: "" },
-    { customer: "Quin", site: "" },
-    { customer: "Aquascot", site: "" },
-    { customer: "Village", site: " Bakery" },
-    { customer: "Cranswick", site: " Watton" },
-    { customer: "Butlers Farmhouse cheeses", site: "" },
-    { customer: "Finsbury", site: "" },
-    { customer: "HFUK", site: "" },
-    { customer: "Zertus", site: " UK" },
-  ];
-
-  customerSiteData.forEach((entry, index) => {
-    const portalName = `${entry.customer} ${entry.site}`;
-    const portalItem = `
-            <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="portal-${index}">
-                <label for="portal-${index}" class="form-check-label">${portalName}</label>
-            </div>
+  fetch("http://localhost:302/client-names")
+    .then((response) => {
+      if (!response.ok) throw new Error("Failed to fetch client names");
+      return response.json();
+    })
+    .then((clientNames) => {
+      clientNames.forEach((portalName, index) => {
+        const portalItem = `
+          <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="portal-${index}">
+              <label for="portal-${index}" class="form-check-label">${portalName}</label>
+          </div>
         `;
-    portalList.innerHTML += portalItem;
-  });
+        portalList.innerHTML += portalItem;
+      });
+    })
+    .catch((error) => {
+      console.error("Error loading client names:", error);
+      alert("Unable to load client names.");
+    });
 
   fetchDataButton.addEventListener("click", async () => {
     if (validateInputs()) {
@@ -86,10 +61,9 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!response.ok)
             throw new Error("Failed to fetch data for all clients");
           data = await response.json();
-          console.log("data");
         } else {
           for (const checkbox of selectedCheckboxes) {
-            const clientName = checkbox.nextElementSibling.innerText.replace();
+            const clientName = checkbox.nextElementSibling.innerText;
             const response = await fetch(
               `http://localhost:302/client?clientName=${clientName}&startDate=${fromDate}&endDate=${toDate}`
             );
@@ -132,29 +106,23 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         const jobsOver150 = parseFloat(downtimeData["Over 150 Hours"] || 0);
 
-        poweredOff = poweredOff.toFixed(2);
-        unclassified = unclassified.toFixed(2);
-
-        let uncategorizedPercentage;
-
-        uncategorizedPercentage = (
-          (parseFloat(noncategorised) / downtimeData["Total Downtime Hours"]) *
-            100 || 0
+        let uncategorizedPercentage = (
+          (noncategorised / totalDowntimeHours) * 100 || 0
         ).toFixed(2);
 
         return `
-              <tr>
-                  <td>${item.client}</td>
-                  <td>${alltime}</td>
-                  <td>${totalDowntimeHours}</td>
-                  <td>${noncategorised}</td>
-                  <td>${unclassified}</td>
-                  <td>${poweredOff}</td>
-                  <td>${unplanned}</td>
-                  <td>${uncategorizedPercentage}%</td>
-                  <td>${jobsOver150}</td>
-              </tr>
-          `;
+          <tr>
+              <td>${item.client}</td>
+              <td>${alltime.toFixed(2)}</td>
+              <td>${totalDowntimeHours.toFixed(2)}</td>
+              <td>${noncategorised.toFixed(2)}</td>
+              <td>${unclassified.toFixed(2)}</td>
+              <td>${poweredOff.toFixed(2)}</td>
+              <td>${unplanned.toFixed(2)}</td>
+              <td>${uncategorizedPercentage}%</td>
+              <td>${jobsOver150.toFixed(2)}</td>
+          </tr>
+        `;
       })
       .join("");
   }
@@ -186,42 +154,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(dataToExport);
-
-    // Apply styling to header row
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      alignment: { horizontal: "center", vertical: "center" },
-      fill: { patternType: "solid", fgColor: { rgb: "2F75B5" } }, // Blue header
-    };
-
-    const grayFill = { patternType: "solid", fgColor: { rgb: "E7E6E6" } }; // Light gray
-    const greenFill = { patternType: "solid", fgColor: { rgb: "C6EFCE" } }; // Soft green
-
-    const range = XLSX.utils.decode_range(ws["!ref"]);
-    for (let col = 0; col <= range.e.c; col++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-      const cell = ws[cellAddress];
-      if (!cell) continue;
-
-      cell.s = { ...headerStyle };
-
-      if (col === 2) {
-        delete cell.s.fill;
-      } else if (col >= 6) {
-        cell.s.fill = greenFill;
-      } else {
-        cell.s.fill = grayFill;
-      }
-    }
-
-    // Optional: freeze top row
-    ws["!freeze"] = { xSplit: 0, ySplit: 1 };
-
-    // Append sheet and write file
     XLSX.utils.book_append_sheet(wb, ws, "Onboarding Data");
     XLSX.writeFile(wb, fileName);
   });
 
+  // ✅ Input validation
   function validateInputs() {
     const fromDate = document.getElementById("from-date").value;
     const toDate = document.getElementById("to-date").value;
